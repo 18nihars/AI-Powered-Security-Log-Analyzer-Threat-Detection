@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Latest run: {{ run.filename }}</h1>
+  <p class="muted">{{ run.total_events }} events across {{ run.total_ips }} unique IP addresses · run #{{ run.id }}</p>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="num" style="color:var(--critical)">{{ counts.get('Critical',0) }}</div><div class="lbl">Critical</div></div>
+    <div class="stat"><div class="num" style="color:var(--high)">{{ counts.get('High',0) }}</div><div class="lbl">High</div></div>
+    <div class="stat"><div class="num" style="color:var(--medium)">{{ counts.get('Medium',0) }}</div><div class="lbl">Medium</div></div>
+    <div class="stat"><div class="num" style="color:var(--low)">{{ counts.get('Low',0) }}</div><div class="lbl">Low</div></div>
+    <div class="stat"><div class="num" style="color:var(--normal)">{{ counts.get('Normal',0) }}</div><div class="lbl">Normal</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Threats by IP</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>IP</th><th>Classification</th><th>Score</th><th>Rule</th><th>ML</th>
+        <th>Failed</th><th>Users</th><th>Ports</th><th>Ev/min</th><th>Reasons</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in alerts %}
+      <tr>
+        <td class="mono">{{ a.ip }}</td>
+        <td><span class="badge {{ a.classification }}">{{ a.classification }}</span></td>
+        <td>{{ "%.2f"|format(a.final_score) }}</td>
+        <td>{{ "%.2f"|format(a.rule_score) }}</td>
+        <td>{{ "%.2f"|format(a.ml_anomaly_score) }}</td>
+        <td>{{ a.failed_count }}</td>
+        <td>{{ a.unique_users }}</td>
+        <td>{{ a.unique_ports }}</td>
+        <td>{{ "%.1f"|format(a.events_per_minute) }}</td>
+        <td class="reasons">
+          {% if a.rule_reasons %}
+            <ul>{% for r in a.rule_reasons %}<li>{{ r }}</li>{% endfor %}</ul>
+          {% else %}
+            <span class="muted">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

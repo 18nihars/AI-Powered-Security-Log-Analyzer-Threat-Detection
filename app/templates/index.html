@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Analyze Logs{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Analyze a log file</h1>
+  <p class="muted">Upload an authentication/server log to run it through the rule-based + ML detection pipeline.
+     Expected line format (one per event):</p>
+  <p class="mono muted">2026-09-26 03:14:07 ip=192.168.1.45 user=admin event=login status=failed port=22</p>
+
+  <form action="{{ url_for('analyze_route') }}" method="post" enctype="multipart/form-data" style="margin-top:20px;">
+    <p><input type="file" name="logfile" accept=".log,.txt"></p>
+    <p><button type="submit">Upload &amp; Analyze</button></p>
+  </form>
+
+  <hr style="border-color: var(--border); margin: 24px 0;">
+
+  <p class="muted">No log file handy? Try the bundled synthetic demo log (contains a brute-force burst,
+     credential stuffing, a port scan, and normal traffic).</p>
+  <form action="{{ url_for('analyze_route') }}" method="post">
+    <input type="hidden" name="use_sample" value="1">
+    <button type="submit" class="secondary">Use sample_auth.log</button>
+  </form>
+</div>
+{% endblock %}

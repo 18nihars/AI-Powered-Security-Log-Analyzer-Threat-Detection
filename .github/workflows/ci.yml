@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    name: Lint, SAST, dependency scan, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (flake8)
+        run: flake8 app tests --max-line-length=120
+
+      - name: SAST (bandit)
+        run: bandit -r app -c bandit.yaml
+
+      - name: Dependency vulnerability scan (pip-audit)
+        run: pip-audit -r requirements.txt
+
+      - name: Unit tests (pytest)
+        run: pytest --maxfail=1
+
+  docker-build-and-scan:
+    name: Build image & scan for vulnerabilities
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t security-log-analyzer:${{ github.sha }} .
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: security-log-analyzer:${{ github.sha }}
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
+          ignore-unfixed: true

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Run history</h1>
+  <table>
+    <thead><tr><th>#</th><th>Filename</th><th>When</th><th>Events</th><th>IPs</th><th>Critical</th><th>High</th></tr></thead>
+    <tbody>
+      {% for r in runs %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td class="mono">{{ r.filename }}</td>
+        <td>{{ r.created_at }}</td>
+        <td>{{ r.total_events }}</td>
+        <td>{{ r.total_ips }}</td>
+        <td>{{ r.critical_count }}</td>
+        <td>{{ r.high_count }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">No runs yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

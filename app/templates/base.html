@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Security Log Analyzer{% endblock %}</title>
+<style>
+  :root {
+    --bg: #fafafa; --panel: #ffffff; --border: #ececec; --text: #1c1c1e;
+    --muted: #77777f; --accent: #ff7a1a; --accent-dark: #e0620a; --accent-tint: #fff2e6;
+    --critical: #d0392b; --high: #e0620a; --medium: #b8860b; --low: #1f8a52; --normal: #9aa0a6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased;
+  }
+  nav {
+    display: flex; align-items: center; gap: 28px; padding: 18px 32px;
+    border-bottom: 1px solid var(--border); background: var(--panel);
+    position: sticky; top: 0; z-index: 10;
+  }
+  nav a { color: var(--text); text-decoration: none; font-weight: 600; font-size: 0.92rem; opacity: 0.65; padding: 6px 2px; border-bottom: 2px solid transparent; }
+  nav a:hover { opacity: 1; color: var(--accent-dark); }
+  nav a.active { opacity: 1; color: var(--accent-dark); border-bottom-color: var(--accent); }
+  nav .brand { font-weight: 800; font-size: 1.12rem; display: flex; align-items: center; gap: 9px; color: var(--text); margin-right: 8px; }
+  nav .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); display: inline-block; box-shadow: 0 0 0 4px var(--accent-tint); }
+  main { max-width: 1100px; margin: 0 auto; padding: 36px 32px 60px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 26px 28px; margin-bottom: 22px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.03);
+  }
+  h1 { font-size: 1.5rem; margin-top: 0; font-weight: 800; letter-spacing: -0.01em; }
+  h2 { font-size: 0.85rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  th {
+    color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 0.72rem;
+    letter-spacing: 0.05em; background: #fbfbfb; border-top: 1px solid var(--border);
+  }
+  th:first-child { border-top-left-radius: 8px; }
+  th:last-child { border-top-right-radius: 8px; }
+  tbody tr:hover { background: var(--accent-tint); }
+  tbody tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: 0.72rem; font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .Critical { background: rgba(208,57,43,0.1); color: var(--critical); }
+  .High { background: rgba(224,98,10,0.1); color: var(--high); }
+  .Medium { background: rgba(184,134,11,0.1); color: var(--medium); }
+  .Low { background: rgba(31,138,82,0.1); color: var(--low); }
+  .Normal { background: rgba(154,160,166,0.14); color: var(--normal); }
+  .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .stat {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+    text-align: center; transition: border-color 0.15s;
+  }
+  .stat:hover { border-color: var(--accent); }
+  .stat .num { font-size: 1.9rem; font-weight: 800; }
+  .stat .lbl { color: var(--muted); font-size: 0.76rem; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .reasons { color: var(--muted); font-size: 0.82rem; }
+  .reasons ul { margin: 0; padding-left: 16px; }
+  .reasons li { margin-bottom: 3px; }
+  button, .btn {
+    background: var(--accent); color: #ffffff; border: none; padding: 11px 22px;
+    border-radius: 9px; font-weight: 700; cursor: pointer; font-size: 0.9rem; text-decoration: none;
+    display: inline-block; box-shadow: 0 2px 6px rgba(255,122,26,0.28); transition: background 0.15s, transform 0.05s;
+  }
+  button:hover, .btn:hover { background: var(--accent-dark); }
+  button:active, .btn:active { transform: translateY(1px); }
+  button.secondary, .btn.secondary {
+    background: var(--panel); border: 1.5px solid var(--border); color: var(--text); box-shadow: none;
+  }
+  button.secondary:hover, .btn.secondary:hover { background: var(--accent-tint); border-color: var(--accent); color: var(--accent-dark); }
+  input[type=file] {
+    color: var(--text); background: #fbfbfb; border: 1.5px dashed var(--border); border-radius: 10px;
+    padding: 14px; width: 100%;
+  }
+  .flash {
+    background: var(--accent-tint); color: var(--accent-dark); border: 1px solid #ffd9b3;
+    padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; font-size: 0.9rem;
+  }
+  .muted { color: var(--muted); }
+  .mono { font-family: "SF Mono", Consolas, monospace; }
+  hr { border: none; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand"><span class="dot"></span>Security Log Analyzer</div>
+  <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">Analyze</a>
+  <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">Dashboard</a>
+  <a href="{{ url_for('history') }}" class="{{ 'active' if request.endpoint == 'history' else '' }}">History</a>
+</nav>
+<main>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

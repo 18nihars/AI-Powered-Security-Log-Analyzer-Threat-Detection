@@ -1,0 +1,11 @@
+# Bandit (Python SAST) configuration.
+# Excludes tests (assert usage, etc. trip B101 there harmlessly) and the venv.
+exclude_dirs:
+  - tests
+  - .venv
+  - data
+
+skips:
+  # B101: assert_used — fine inside our own test suite; tests dir is excluded above,
+  # this just documents intent if bandit is ever pointed at the whole repo.
+  - B101

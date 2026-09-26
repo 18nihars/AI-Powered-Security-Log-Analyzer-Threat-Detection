@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+tests/
+data/threats.db
+data/uploads/
+.pytest_cache/
+*.log
+.pre-commit-config.yaml
+README.md
