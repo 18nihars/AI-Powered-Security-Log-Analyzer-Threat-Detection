@@ -45,9 +45,10 @@ jobs:
         run: docker build -t security-log-analyzer:${{ github.sha }} .
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: security-log-analyzer:${{ github.sha }}
+          format: "table"
           severity: "HIGH,CRITICAL"
           exit-code: "1"
           ignore-unfixed: true
